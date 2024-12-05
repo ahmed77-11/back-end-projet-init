@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  nom       String  @db.VarChar(191) // Reduced length
+  prenom    String  @db.VarChar(191) // Reduced length
+  email     String  @unique @db.VarChar(191) // Reduced length
+  password  String  @db.VarChar(255)
+  photo     String? @default("uploads/photo-du-profile.png")
+  verifCode Int?
+  enabled   Boolean @default(false)
+
+  // Role Relationship
+  roles Role[] @relation("UserRoles")
+
+  // Specific Relationships to Client, Coach, and Admin
+  client Client?
+  coach  Coach?
+  admin  Admin?
+}
+
+model Role {
+  id   Int    @id @default(autoincrement())
+  role String @unique @db.VarChar(191) // Reduced length
+
+  // Users Relationship
+  users User[] @relation("UserRoles")
+}
+
+model Client {
+  id     Int    @id @default(autoincrement())
+  adr    String @db.VarChar(255)
+  pods   Int
+  taille Float
+
+  // Relationship with User
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Coach {
+  id          Int     @id @default(autoincrement())
+  cv          String  @db.VarChar(255)
+  diplome     String  @db.VarChar(255)
+  description String  @db.Text // Use Text for longer descriptions
+  verified    Boolean @default(false)
+
+  // Relationship with User
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Admin {
+  id Int @id @default(autoincrement())
+
+  // Relationship with User
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

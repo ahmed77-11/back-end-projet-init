@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum VerificationStatus {
+  pending
+  verified
+  rejected
+}
+
+enum InvitationStatus {
+  pending
+  accepted
+  rejected
+}
+
+enum diffuculte{
+  facile
+  moyen
+  difficile
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  nom       String  @db.VarChar(191)
+  prenom    String  @db.VarChar(191)
+  email     String  @unique @db.VarChar(191)
+  password  String  @db.VarChar(255)
+  photo     String? @default("uploads/photo-du-profile.png")
+  verifCode Int?
+  enabled   Boolean @default(false)
+
+  roles Role[] @relation("UserRoles")
+  exercices Exercice[]
+
+  programeAdded    Programe? @relation("AddedByUser") // Relation for programs added by this user
+  programeReceived Programe? @relation("AddedForUser") // Relation for programs added for this user
+
+  client Client?
+  coach  Coach?
+  admin  Admin?
+}
+
+model Role {
+  id   Int    @id @default(autoincrement())
+  role String @unique @db.VarChar(191)
+
+  // Users Relationship
+  users User[] @relation("UserRoles")
+}
+
+model Client {
+  id      Int              @id @default(autoincrement())
+  adr     String           @db.VarChar(255)
+  pods    Int
+  taille  Float
+  coachId Int? // Foreign key for the Coach the client is following
+  status  InvitationStatus @default(pending) // Status of the invitation request
+
+  // Relationship with User
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relationship with Coach
+  coach Coach? @relation(fields: [coachId], references: [id], onDelete: SetNull)
+}
+
+model Coach {
+  id          Int                @id @default(autoincrement())
+  cv          String             @db.VarChar(255)
+  diplome     String             @db.VarChar(255)
+  description String             @db.Text
+  verified    VerificationStatus @default(pending)
+
+  // Relationship with User
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relationship with Clients
+  clients Client[] // A coach can be followed by multiple clients
+}
+
+model Admin {
+  id Int @id @default(autoincrement())
+
+  // Relationship with User
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Exercice {
+  id          Int        @id @default(autoincrement())
+  nom         String     @db.VarChar(191)
+  description String     @db.Text
+  video       String     @db.VarChar(255)
+  image       String     @db.VarChar(255)
+  categoryId  Int
+  category    Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  repetion    Int
+  diffuculte  diffuculte @default(facile)
+  addedTime   DateTime   @default(now())
+  addedBy     Int
+  addedByUser User       @relation(fields: [addedBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  // Explicit Many-to-Many with Programe through ExercicePrograme
+  exercicePrograme ExercicePrograme[]
+}
+
+model Programe {
+  id        Int               @id @default(autoincrement())
+  nom       String            @db.VarChar(191)
+  terminer Int @default(0)
+  exercicePrograme ExercicePrograme[]
+
+
+  addedBy     Int               @unique // One-to-one relationship with User who added the program
+  addedByUser User              @relation("AddedByUser", fields: [addedBy], references: [id], onDelete: Cascade)
+
+  addedFor    Int               @unique // One-to-one relationship with User for whom the program was added
+  addedForUser User             @relation("AddedForUser", fields: [addedFor], references: [id], onDelete: Cascade)
+
+}
+
+
+model ExercicePrograme {
+  id           Int      @id @default(autoincrement()) // Primary Key
+  exerciceId   Int      // Foreign Key for Exercice
+  programmeId  Int      // Foreign Key for Programe
+  completed Boolean   @default(false) // Additional Field
+  addedTime    DateTime @default(now()) // Additional Field
+
+  // Relations
+  exercice  Exercice  @relation(fields: [exerciceId], references: [id], onDelete: Cascade)
+  programme Programe  @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+
+
+
+  // Optional: Add unique constraint if needed
+  @@unique([exerciceId, programmeId]) // Ensures no duplicate pairs
+}
+
+model Category{
+  id Int @id @default(autoincrement())
+  Type String @db.VarChar(191)
+  nom String @db.VarChar(191)
+
+  exercices Exercice[]
+}

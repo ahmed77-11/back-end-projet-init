@@ -56,16 +56,18 @@ const getUserByRoleAndEmail = async (role, email) => {
                     role: true // Select the role name
                 }
             },
-            // Conditionally select based on role
+            // Conditionally include related data based on role
             client: role === 'client' ? {
                 select: {
                     adr: true,
                     pods: true,
                     taille: true,
                     coachId: true,
-                    status:true
+                    coach:true,
+                    status: true,
                 }
-            } : false,
+            } : false, // If not 'client', don't select this field
+
             coach: role === 'coach' ? {
                 select: {
                     cv: true,
@@ -73,17 +75,19 @@ const getUserByRoleAndEmail = async (role, email) => {
                     description: true,
                     verified: true
                 }
-            } : false,
+            } : false, // If not 'coach', don't select this field
+
             admin: role === 'admin' ? {
                 select: {
-                    id: true // Add other admin-specific fields if needed
+                    id: true, // Add other admin-specific fields if needed
                 }
-            } : false
+            } : false, // If not 'admin', don't select this field
         },
     });
 
-    return user || null;
+    return user || null; // Return null if no user is found
 };
+
 
 
 

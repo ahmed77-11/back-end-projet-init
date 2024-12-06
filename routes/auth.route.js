@@ -1,10 +1,11 @@
 import express from "express";
 import {
+    authMiddleware,
     resetPassword,
     sentVerifCodeForForgatePassword,
     signInAdmin,
     signInClient,
-    signInCoach,
+    signInCoach, signOut,
     signUpClient,
     signUpCoach, verifCodeForgotPassword,
     verifyEmail
@@ -23,6 +24,7 @@ router.post("/signinAdmin",signInAdmin);
 router.post("/forgetPassword",sentVerifCodeForForgatePassword);
 router.post("/verifForgotPassword",verifCodeForgotPassword)
 router.post("resetPassword",resetPassword);
+router.post("/signOut",authMiddleware,signOut);
 
 
 export default router;

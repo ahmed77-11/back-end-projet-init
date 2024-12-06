@@ -106,7 +106,31 @@ export const findFollowPending = async (id) => {
     const clients = await prisma.client.findMany({
         where: {
             coachId: id,
-            status: InvitationStatus.pending, // Assuming this is valid
+            status: "pending", // Assuming this is valid
+        },
+        include: {
+            user: true, // Fetch the associated user details
+        },
+    });
+
+    return clients.map(client => ({
+        ...client.user,
+        client: {
+            id: client.id,
+            adr: client.adr,
+            pods: client.pods,
+            taille: client.taille,
+            coachId: client.coachId,
+            status: client.status,
+        },
+    }));
+};
+
+export const findFollowAccepted = async (id) => {
+    const clients = await prisma.client.findMany({
+        where: {
+            coachId: id,
+            status: "accepted", // Assuming this is valid
         },
         include: {
             user: true, // Fetch the associated user details

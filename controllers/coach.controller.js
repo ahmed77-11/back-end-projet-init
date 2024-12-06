@@ -1,6 +1,6 @@
 import {
     deleteCoach,
-    findAllCoaches,
+    findAllCoaches, findFollowAccepted,
     findFollowPending,
     getCoachById,
     updateCoachData
@@ -137,6 +137,23 @@ export const getClientPending=async (req,res)=>{
 
         return res.status(200).json(clients);
     }catch (e) {
+        console.log(e)
+        return res.status(500).json({message: e.message});
+    }
+}
+export const getClientAccepted=async (req,res)=>{
+    const userId=req.userId;
+    try {
+        const coach = await getCoachById(userId);
+        if (!coach) {
+            return res.status(404).json({message: "Coach not found"});
+        }
+        const clients=await findFollowAccepted(coach.coach.id);
+        console.log(clients)
+
+        return res.status(200).json(clients);
+    }catch (e) {
+        console.log(e)
         return res.status(500).json({message: e.message});
     }
 }

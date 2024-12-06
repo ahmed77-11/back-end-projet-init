@@ -7,8 +7,10 @@ import {
 } from "../services/programe.service.js";
 
 export const addPrograme= async (req,res)=>{
+    console.log(req.body)
     const userId=req.userId;
     const clientId=parseInt(req.params.id);
+    console.log(clientId)
     const {nom,exercices}=req.body;
     try{
         const client=await getClientById(clientId);
@@ -30,6 +32,7 @@ export const findProgrammeById=async (req,res)=>{
         if(!programme){
             return res.status(404).json({message:"Programme not found"});
         }
+        console.log(programme)
         return res.status(200).json(programme);
     }catch (e) {
         console.log(e)
@@ -90,6 +93,7 @@ export const removeExerciceFromProgramme=async (req,res)=>{
 }
 
 export const completeAnExercice=async (req,res)=>{
+    console.log(req.body)
     const {exerciceId}=req.body;
     const programmeId=parseInt(req.params.id);
     try{

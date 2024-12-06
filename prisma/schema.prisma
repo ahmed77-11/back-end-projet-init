@@ -44,8 +44,8 @@ model User {
   roles Role[] @relation("UserRoles")
   exercices Exercice[]
 
-  programeAdded    Programe? @relation("AddedByUser") // Relation for programs added by this user
-  programeReceived Programe? @relation("AddedForUser") // Relation for programs added for this user
+  programeAdded    Programe[] @relation("AddedByUser") // Relation for programs added by this user
+  programeReceived Programe[] @relation("AddedForUser") // Relation for programs added for this user
 
   client Client?
   coach  Coach?
@@ -118,20 +118,17 @@ model Exercice {
 }
 
 model Programe {
-  id        Int               @id @default(autoincrement())
-  nom       String            @db.VarChar(191)
-  terminer Int @default(0)
+  id               Int               @id @default(autoincrement())
+  nom              String            @db.VarChar(191)
+  terminer         Int               @default(0)
   exercicePrograme ExercicePrograme[]
 
-
-  addedBy     Int               @unique // One-to-one relationship with User who added the program
+  addedBy     Int               // Many-to-one relationship with User (coach) who added the program
   addedByUser User              @relation("AddedByUser", fields: [addedBy], references: [id], onDelete: Cascade)
 
-  addedFor    Int               @unique // One-to-one relationship with User for whom the program was added
+  addedFor    Int               // Many-to-one relationship with User (client) for whom the program was added
   addedForUser User             @relation("AddedForUser", fields: [addedFor], references: [id], onDelete: Cascade)
-
 }
-
 
 model ExercicePrograme {
   id           Int      @id @default(autoincrement()) // Primary Key

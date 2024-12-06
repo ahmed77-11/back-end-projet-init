@@ -3,6 +3,7 @@ import prisma from "../connexion.js";
 
 export const saveProgramme= async (programme)=>{
     const { nom, addedBy, addedFor, exercices } = programme;
+    console.log(programme)
 
     try {
         // Start a transaction to ensure all operations succeed or fail together
